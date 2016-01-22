@@ -81,9 +81,28 @@
             if (this.attributes.n === 0) {
                 return false;
             }
+
+            // thisRow = this.get(rowIndex);
+            // //set a counter
+            // var count = 0;
+            // //iterate throught the spaces on the row
+            // _.each(thisRow, function(value) {
+            //     //spaces with pieces === 1, so add 1 to count if any exist.
+            //     count += value;
+            //     console.log(count);
+            //     //if there is more than 1, there is a conflict.
+            // });
+            // if (count > 1) {
+            //     return true;
+            // }
+
+            // return false;
+
+
             return _.filter(this.get(rowIndex), function(value) {
                 return value === 1;
             }).length > 1;
+
         },
 
 
@@ -95,6 +114,8 @@
             return _.some(this.rows(), function(row, rowIndex) {
                 return this.hasRowConflictAt(rowIndex);
             }.bind(this)); //keep context to board instead of Window
+
+
         },
 
 
@@ -107,20 +128,40 @@
             if (this.attributes.n === 0) {
                 return false;
             }
-            var columns = _.zip.apply(null, this.rows()); //swap x and y. sees rows as separate args
-            return _.filter(columns[colIndex], function(value) {
-                return value === 1;
-            }).length > 1;
+            var counter = 0;
+            var rows = this.rows();
+            for (var i = 0; i < rows.length; i++) {
+                if (rows[i][colIndex] === 1) {
+                    counter++;
+                }
+            }
 
+            return counter > 1;
+            // refactored from:
+            // var columns = _.zip.apply(null, this.rows()); //swap x and y. sees rows as separate args
+            // return _.filter(columns[colIndex], function(value) {
+            //     return value === 1;
+            // }).length > 1;
         },
         hasAnyColConflicts: function() {
-            if (this.attributes.n === 0) {
+            var n = this.attributes.n;
+            if (n === 0) {
                 return false;
             }
-            var columns = _.zip.apply(null, this.rows());
-            return _.some(_.range(0, columns.length), function(colIndex) {
-                return this.hasColConflictAt(colIndex);
-            }.bind(this)); // keep context in an inner function.
+
+            var conflict = false;
+
+            for (var i = 0; i < n; i++) {
+                conflict = this.hasColConflictAt(i) || conflict;
+            }
+            return conflict;
+
+            // refactored from expensive solution:
+            // var columns = _.zip.apply(null, this.rows());
+            // return _.some(_.range(0, columns.length), function(colIndex) {
+            //     return this.hasColConflictAt(colIndex);
+            // }.bind(this)); // keep context in an inner function.
+
         },
 
         // Major Diagonals - go from top-left to bottom-right
@@ -162,7 +203,7 @@
         //
         // test if a specific minor diagonal on this board contains a conflict
         hasMinorDiagonalConflictAt: function(minorDiagonalColumnIndexAtFirstRow) {
-                        if (this.attributes.n === 0) {
+            if (this.attributes.n === 0) {
                 return false;
             }
 
@@ -179,7 +220,7 @@
         },
         // test if any minor diagonals on this board contain conflicts
         hasAnyMinorDiagonalConflicts: function() {
-                      if (this.attributes.n === 0) {
+            if (this.attributes.n === 0) {
                 return false;
             }
             var indexArr = _.range(0, 2 * (this.get(0).length - 1)); //[0,1,2,3]
